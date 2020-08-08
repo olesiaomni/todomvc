@@ -1,0 +1,7 @@
+# Project exclude paths
+.gradle/
+./.idea
+.idea
+out/
+build/
+build/classes/java/test/
