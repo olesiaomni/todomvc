@@ -1,6 +1,7 @@
 package com.taotas.todomvc.drypoctest;
 
 import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.Test;
@@ -23,48 +24,55 @@ public class UserWorkflowsDrySpec {
                         ".hasOwnProperty('click')"));
 
         // Add
-        add("a");
-        add("b");
-        add("c");
-
-        elements(todoList).shouldHave(exactTexts("a", "b", "c"));
-        checkTodoListCount("3");
+        add("a", "b", "c");
+        todosShouldBe("a", "b", "c");
+        itemsLeftShouldBe(3);
 
         // Edit
-        prepareTaskForEditing("b");
-        editTaskName(" edited").pressEnter();
+        editTodoName("b"," edited").pressEnter();
 
         // Complete and Clear
-        elements(todoList).findBy(exactText("b edited")).find(".toggle").click();
+        todo("b edited").find(".toggle").click();
         element("#clear-completed").click();
-        elements(todoList).shouldHave(exactTexts("a", "c"));
+        todosShouldBe("a", "c");
 
         // Cancel Edit
-        prepareTaskForEditing("a");
-        editTaskName("to be canceled").pressEscape();
+        editTodoName("a","to be canceled").pressEscape();
 
         // Delete
-        elements(todoList).findBy(exactText("a")).hover().find(".destroy").click();
-        elements(todoList).shouldHaveSize(1);
-        checkTodoListCount("1");
+        todo("a").hover().find(".destroy").click();
+        elements(todos).shouldHaveSize(1);
+        itemsLeftShouldBe(1);
     }
 
-    private void checkTodoListCount(String tasksCount) {
-        element("#todo-count>strong").shouldHave(exactText(tasksCount));
+    private final ElementsCollection todos = elements("#todo-list>li");
+
+    private SelenideElement todo(String value) {
+        return elements(todos).findBy(exactText(value));
     }
 
-    private SelenideElement editTaskName(String newText) {
-        return elements(todoList).findBy(cssClass("editing")).find(".edit")
-                .append(newText);
+    private void todosShouldBe(String... todos) {
+        elements(this.todos).shouldHave(exactTexts(todos));
     }
 
-    private void prepareTaskForEditing(String taskName) {
-        elements(todoList).findBy(exactText(taskName)).doubleClick();
+    private void itemsLeftShouldBe(int todosCount) {
+        String count = Integer.toString(todosCount);
+        element("#todo-count>strong").shouldHave(exactText(count));
     }
 
-    private final String todoList = "#todo-list>li";
+    private SelenideElement editTodoName(String oldTodo, String textToAdd) {
+        prepareTodoForEditing(oldTodo);
+        return elements(todos).findBy(cssClass("editing")).find(".edit")
+                .append(textToAdd);
+    }
 
-    private void add(String text) {
-        element("#new-todo").append(text).pressEnter();
+    private void prepareTodoForEditing(String todo) {
+        todo(todo).doubleClick();
+    }
+
+    private void add(String... todos) {
+        for(String todo: todos) {
+            element("#new-todo").append(todo).pressEnter();
+        }
     }
 }
