@@ -3,6 +3,9 @@ import com.codeborne.selenide.*;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static com.codeborne.selenide.CollectionCondition.*;
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selenide.*;
@@ -18,9 +21,9 @@ public class UserWorkflowsPocSpec {
                         ".hasOwnProperty('click')"));
 
         // Add
-        element("#new-todo").append("a").pressEnter();
-        element("#new-todo").append("b").pressEnter();
-        element("#new-todo").append("c").pressEnter();
+        add("a");
+        add("b");
+        add("c");
         elements("#todo-list>li").shouldHave(exactTexts("a", "b", "c"));
         element("#todo-count>strong").shouldHave(exactText("3"));
 
@@ -43,5 +46,9 @@ public class UserWorkflowsPocSpec {
         elements("#todo-list>li").findBy(exactText("a")).hover().find(".destroy").click();
         elements("#todo-list>li").shouldHaveSize(1);
         element("#todo-count>strong").shouldHave(exactText("1"));
+    }
+
+    private void add(String text) {
+            element("#new-todo").append(text).pressEnter();
     }
 }
