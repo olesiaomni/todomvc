@@ -29,7 +29,7 @@ public class UserWorkflowsDrySpec {
         itemsLeftShouldBe(3);
 
         // Edit
-        editTodoName("b"," edited").pressEnter();
+        startEditing("b"," edited").pressEnter();
 
         // Complete and Clear
         todo("b edited").find(".toggle").click();
@@ -37,7 +37,7 @@ public class UserWorkflowsDrySpec {
         todosShouldBe("a", "c");
 
         // Cancel Edit
-        editTodoName("a","to be canceled").pressEscape();
+        startEditing("a","to be canceled").pressEscape();
 
         // Delete
         todo("a").hover().find(".destroy").click();
@@ -60,7 +60,7 @@ public class UserWorkflowsDrySpec {
         element("#todo-count>strong").shouldHave(exactText(count));
     }
 
-    private SelenideElement editTodoName(String oldTodo, String textToAdd) {
+    private SelenideElement startEditing(String oldTodo, String textToAdd) {
         prepareTodoForEditing(oldTodo);
         return elements(todos).findBy(cssClass("editing")).find(".edit")
                 .append(textToAdd);
