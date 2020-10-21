@@ -14,35 +14,25 @@ import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.Selenide.element;
 
 public class UserWorkflowsKissSpec {
+
     @Test
     public void basicUserWorkflowTest()  {
-        Configuration.timeout = 6000;
+        Configuration.fastSetValue = true;
 
-        open("http://todomvc4tasj.herokuapp.com/");
-        Selenide.Wait().until(ExpectedConditions.jsReturnsValue(
-                "return $._data($('#clear-completed').get(0), 'events')" +
-                        ".hasOwnProperty('click')"));
+        openTodoMvc();
 
-        // Add
-        add("a");
-        add("b");
-        add("c");
+        add("a", "b", "c");
         todosShouldBe("a", "b", "c");
         leftItemsShouldBe(3);
 
-        // Edit
-        startEditing("b", " edited").pressEnter();
+        edit("b", "b edited");
 
-        // Complete and Clear
-        exactTodo("b edited").find(".toggle").click();
-        element("#clear-completed").click();
-        todosShouldBe("a", "c");
+        toggle("b edited");
+        checkNonCompletedTodos("a", "c");
 
-        // Cancel Edit
-        startEditing("a", "to be canceled").pressEscape();
+        cancelEditing("a", "a to be canceled");
 
-        // Delete
-        exactTodo("a").hover().find(".destroy").click();
+        delete("a");
         todos.shouldHaveSize(1);
         leftItemsShouldBe(1);
     }
@@ -56,7 +46,35 @@ public class UserWorkflowsKissSpec {
     private SelenideElement startEditing(String oldTodo, String textToAdd) {
         exactTodo(oldTodo).doubleClick();
         return todos.findBy(cssClass("editing")).find(".edit")
-                .append(textToAdd);
+                .setValue(textToAdd);
+    }
+
+    private void openTodoMvc(){
+        open("http://todomvc4tasj.herokuapp.com/");
+        Selenide.Wait().until(ExpectedConditions.jsReturnsValue(
+                "return $._data($('#clear-completed').get(0), 'events')" +
+                        ".hasOwnProperty('click')"));
+    }
+
+    private void checkNonCompletedTodos(String... todos){
+        element("#clear-completed").click();
+        todosShouldBe(todos);
+    }
+
+    private void edit(String oldTodo, String textToAdd){
+        startEditing(oldTodo, textToAdd).pressEnter();
+    }
+
+    private void cancelEditing(String oldTodo, String textToAdd){
+        startEditing(oldTodo, textToAdd).pressEscape();
+    }
+
+    private void delete(String todo){
+        exactTodo(todo).hover().find(".destroy").click();
+    }
+
+    private void toggle(String todo){
+        exactTodo(todo).find(".toggle").click();
     }
 
     private void leftItemsShouldBe(int todosCount) {
@@ -68,7 +86,9 @@ public class UserWorkflowsKissSpec {
         elements("#todo-list>li").shouldHave(exactTexts(todos));
     }
 
-    private void add(String todo) {
-        element("#new-todo").append(todo).pressEnter();
+    private void add(String... todos) {
+        for (String text : todos) {
+            element("#new-todo").setValue(text).pressEnter();
+        }
     }
 }
