@@ -5,6 +5,7 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import com.taotas.todomvc.testconfigs.BaseTest;
+import com.taotas.todomvc.testconfigs.WithClearedStorageAfterEachTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -15,12 +16,10 @@ import static com.codeborne.selenide.Condition.exactText;
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.Selenide.element;
 
-public class Poctest extends BaseTest {
+public class Poctest extends WithClearedStorageAfterEachTest {
 
     @Test
     public void basicUserWorkflowTest()  {
-
-        openTodoMvc();
 
         add("a", "b", "c");
         todosShouldBe("a", "b", "c");
@@ -48,13 +47,6 @@ public class Poctest extends BaseTest {
         exactTodo(oldTodo).doubleClick();
         return todos.findBy(cssClass("editing")).find(".edit")
                 .setValue(textToAdd);
-    }
-
-    private void openTodoMvc(){
-        open("/");
-        Selenide.Wait().until(ExpectedConditions.jsReturnsValue(
-                "return $._data($('#clear-completed').get(0), 'events')" +
-                        ".hasOwnProperty('click')"));
     }
 
     private void checkNonCompletedTodos(String... todos){
